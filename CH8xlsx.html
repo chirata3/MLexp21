@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- jsPsychSheet library -->
+    <script src="https://brain2ai.github.io/jsPsychSheet/jspsychsheet.js"></script>
+    <link rel="stylesheet" href="https://brain2ai.github.io/jsPsychSheet/jspsychsheet.css">
+
+<!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script src="./jspsych.js"></script>
+    <script src="./jspsych-html-keyboard-response.js"></script>
+    <script src="./jspsych-survey-text.js"></script>
+    <script src="./jspsych-survey-multi-choice.js"></script>
+    <script src="./jspsych-psychophysics.js"></script>
+    <script src="./ua-parser.min.js"></script>
+    <link rel="stylesheet" href="./css/jspsych.css">
+    </link>
+
+</head>
+
+<body></body>
+<script>
+    var scrX = 1000; var scrY = 400;
+    var arrowL = 25; 
+    var lineX = 100; var lineY = scrY / 2; 
+    var lineW = 2; var lineLen = 300; 
+    var lenTab;
+    var currX;
+    var trlN=0;
+    var appearT=50; var iniMoveT=1500; var moveDur =6500;
+    var moVel=1;
+
+    var par_info = {};
+
+    var getID = {
+        type: 'survey-text',
+        questions: [
+        {prompt: '<br><br>心理学実験：長さの錯視2021<br>学籍番号を入力してください（例：21EC000）<br><br>', 
+            columns: 10, required: true, name: 'theID'},
+        ],
+        button_label: '名前の入力へ',
+        on_finish: function(data) {
+            var parser = new UAParser();
+            var result = parser.getResult();
+
+            par_info.os = result.os.name;
+            par_info.osV = result.os.version;
+            par_info.browser = result.browser.name;
+            par_info.theID = data.response.theID;
+        }
+    };
+
+    var getName = {
+        type: 'survey-text',
+        questions: [
+            {prompt: '名前を入力して下さい（例：十文字こと）', 
+            columns: 20, required: true,name: 'theName'},
+        ],
+        button_label: '実習班の選択へ',
+        on_finish: function(data) {
+            par_info.theName = data.response.theName
+        }
+    };
+
+    var getClass = {
+        type: 'survey-multi-choice',
+        questions: [
+            {prompt: "どのクラスですか？", options: ['2A', '2B', '2C', '2D', '2E', '2F'],
+            required: true, horizontal: false, name: 'theClass'},
+        ],
+        button_label: '練習試行へ',
+        on_finish: function(data) {
+            par_info.theClass = data.response.theClass // 一時保存
+        }
+    };
+
+    const closeArrowLU = {
+        obj_type: 'line',
+        startX: function(){ return lineX + arrowL * Math.cos(jsPsych.timelineVariable('aD', true) * -1 * (Math.PI / 180)); }, 
+        startY: function(){ return lineY + arrowL * Math.sin(jsPsych.timelineVariable('aD', true) * -1 * (Math.PI / 180)); }, 
+        angle: function(){ return jsPsych.timelineVariable('aD', true) * -1; }, 
+        line_length: arrowL * 2, line_width: lineW, line_color: 'black',
+        show_start_time: appearT, // ms after the start of the trial
+    }
+    const closeArrowLB = {
+        obj_type: 'line',
+        startX: function(){return lineX + arrowL * Math.cos(jsPsych.timelineVariable('aD', true)  * (Math.PI / 180));}, 
+        startY: function(){return lineY + arrowL * Math.sin(jsPsych.timelineVariable('aD', true)  * (Math.PI / 180));}, 
+        angle:  function(){return jsPsych.timelineVariable('aD', true); },
+        line_length: arrowL * 2, line_width: lineW, line_color: 'black',
+        show_start_time: appearT, // ms after the start of the trial
+    }
+    const closeArrowRU = {
+        obj_type: 'line',
+        startX: function(){return lineX+lineLen-arrowL * Math.cos(jsPsych.timelineVariable('aD', true)*-1*(Math.PI / 180)); }, 
+        startY: function(){return lineY - arrowL * Math.sin(jsPsych.timelineVariable('aD', true)*(Math.PI / 180)); }, 
+        angle: function(){return jsPsych.timelineVariable('aD', true); },
+        line_length: arrowL * 2, line_width: lineW, line_color: 'black',
+        show_start_time: appearT, // ms after the start of the trial    
+    }
+    const closeArrowRB = {
+        obj_type: 'line',
+        startX: function(){return lineX+lineLen-arrowL * Math.cos(jsPsych.timelineVariable('aD', true)*(Math.PI / 180));}, 
+        startY: function(){return lineY - arrowL * Math.sin(jsPsych.timelineVariable('aD', true) *-1* (Math.PI / 180));}, 
+        angle: function(){return jsPsych.timelineVariable('aD', true)*-1;},
+        line_length: arrowL * 2, line_width: lineW, line_color: 'black',
+        show_start_time: appearT, // ms after the start of the trial
+    }
+    var baseLine = {
+        obj_type: 'line',
+        x1: lineX, x2: scrX,
+        y1: lineY, y2: lineY,
+        line_width: lineW, line_color: 'black',
+        show_start_time: appearT, // ms after the start of the trial
+    }
+
+    var openU = {
+        obj_type: 'line',
+        startX: function(){
+            if(jsPsych.timelineVariable('decF', true)>0){
+                 tmp = lineX + lineLen*2 + lenTab; 
+            } else {tmp = lineX + lineLen + lenTab;}
+            return tmp + arrowL * Math.cos(jsPsych.timelineVariable('aD', true) * -1 * (Math.PI / 180));
+        },
+        startY: function(){
+            return lineY + arrowL * Math.sin(jsPsych.timelineVariable('aD', true)* -1 * (Math.PI / 180));
+        },
+        angle: function(){ return jsPsych.timelineVariable('aD', true) * -1; },
+        horiz_pix_frame: function(){
+            return jsPsych.timelineVariable('decF', true) * -1;
+        }, 
+        line_length: arrowL * 2,line_width: lineW,line_color: 'black',
+        show_start_time: appearT, motion_start_time: iniMoveT, motion_end_time: iniMoveT+moveDur,
+    }
+
+    var openB = {
+        obj_type: 'line',
+        startX: function(){
+            if(jsPsych.timelineVariable('decF', true)>0){
+                 tmp = lineX + lineLen*2 + lenTab; 
+            } else {tmp = lineX + lineLen + lenTab;}
+            return tmp + arrowL * Math.cos(jsPsych.timelineVariable('aD', true) * (Math.PI / 180));
+        },
+        startY: function(){
+            return lineY + arrowL * Math.sin(jsPsych.timelineVariable('aD', true)* (Math.PI / 180));
+        },
+        angle: function(){ return jsPsych.timelineVariable('aD', true); },
+        horiz_pix_frame: function(){
+            return jsPsych.timelineVariable('decF', true) * -1;
+        }, 
+        line_length: arrowL * 2, line_width: lineW, line_color: 'black', 
+        show_start_time: appearT, motion_start_time: iniMoveT, motion_end_time: iniMoveT+moveDur,
+    }
+
+    var eraseLine = {
+        obj_type: 'line',
+        x1: function(){
+            if(jsPsych.timelineVariable('decF', true)>0){
+                return lineX + lineLen*2 + lenTab+2; 
+            } else {return lineX + lineLen + lenTab+2;}
+        },
+        x2: scrX*2, 
+        y1: lineY, y2: lineY,
+        line_width: lineW,
+        line_color: 'gray',
+        horiz_pix_frame: function(){
+            return jsPsych.timelineVariable('decF', true) * -1;
+        }, 
+        show_start_time: appearT, motion_start_time: iniMoveT, motion_end_time: iniMoveT+moveDur,
+    }
+
+    var preInst = {
+        type: 'html-keyboard-response',
+        stimulus: '<center><br><br>最初は練習です。<br>' +
+              'まず灰色の四角形全体が映るようウインドウの大きさを調整して下さい。<br><br>' +
+              '２つの線が同じ長さになった時に「スペースキー」を押して下さい。<br><br>' +
+              'なにかキーを押すと、練習が始まります。</center>',
+        post_trial_gap: 1000
+    }
+
+    var practice_types =[
+        {aD: 90, decF:  1*moVel, condN: '90練習下降'},
+        {aD: 90, decF: -1*moVel, condN: '90練習上昇'},
+     ]
+    var practice_trials = jsPsych.randomization.repeat(practice_types, 2);
+
+    var theInst = {
+        type: 'html-keyboard-response',
+        stimulus: '<center><br><br>ここから本実験です。<br>' +
+              '練習と同じように、線の長さが同じになったら「スペースキー」を押して下さい。<br><br>' +
+              'このデータでレポートを書きます。集中して60試行に臨んで下さい。<br><br>' +
+              'なにかキーを押すと、実験が始まります。</center>',
+        post_trial_gap: 1000
+    }
+
+    var trial_types =[
+        {aD: 15, decF:  1*moVel, condN: '15下降'},
+        {aD: 45, decF:  1*moVel, condN: '45下降'},
+        {aD: 90, decF:  1*moVel, condN: '90下降'},
+        {aD: 15, decF: -1*moVel, condN: '15上昇'},
+        {aD: 45, decF: -1*moVel, condN: '45上昇'},
+        {aD: 90, decF: -1*moVel, condN: '90上昇'},
+     ]
+    var shuffled_trials = jsPsych.randomization.repeat(trial_types, 1);
+
+    var text_object = {
+        obj_type: 'text',
+        startX: -50,
+        startY: scrY/3,
+        origin_center: true,
+        content: '第 0 試行：同じ長さのときにスペースキーを押す',
+        font: "22px 'Arial'",
+        text_color: 'white',
+        change_attr: function (stim) { // Change the content dynamically
+            currX = Math.round(jsPsych.currentTrial().stim_array[5].currentX-arrowL * Math.cos(jsPsych.timelineVariable('aD', true) * (Math.PI / 180)));
+//            stim.content = `currX=${currX}`;
+            stim.content = `第 ${trlN} 試行：同じ長さのときにスペースキーを押す`;
+            
+        }
+    }
+
+
+    var trial = {
+        type: 'psychophysics',
+        background_color: 'gray',
+        canvas_width: function(){
+//            lineX  = Math.round( Math.random() * 15 )*5 + 25; ///CAUTION!!! 75-150 
+            trlN++;
+            lenTab = Math.round( Math.random()*10)*15 + 50; ///CAUTION!!! 50-200 lenTab=100;
+            iniMoveT = Math.round( Math.random()*15)*100 + 500; ///CAUTION!!! 500-2000
+            return scrX;
+        }, 
+        canvas_height: scrY,
+
+        stimuli: [closeArrowLB, closeArrowLU, closeArrowRB, closeArrowRU, 
+              openU, openB, baseLine, eraseLine, text_object],//, baseErase], //, debugLine],
+        response_type: 'key', choices: [' ', '　'],
+
+        // response_type: 'button',
+        // button_html: '<input type="button" value="同じ長さ！" style="font-size:48px;">',
+        // vert_button_margin: '0px', horiz_button_margin: '250px',
+
+        on_finish(data) {
+            data.tab = lenTab,
+            data.iniMove = iniMoveT,
+            data.conds = jsPsych.timelineVariable('condN', true),
+            data.diff = (lineX+lineLen*2)-currX
+        }
+    }
+
+    var preTrl={
+        timeline_variables: practice_trials,
+        timeline: [trial],
+        on_start: function(){
+            trlN=0;
+        }
+    }
+
+    var theML ={
+        timeline_variables: shuffled_trials,
+        timeline:[trial],
+    }
+
+    var theWrap = {
+        type: 'html-keyboard-response',
+        stimulus: '<center><br><br>おつかれさまでした<br>' +
+              '何かキーを押して下さい。<br><br>' +
+              'データのダウンロードが始まります。<br><br>' +
+              'できたファイルを提出して下さい。もう一息です。</center>',
+//              'できたファイルを<a href="https://forms.office.com/r/hkW4b31LNU"> ここから提出</a>して下さい。</center>',
+        post_trial_gap: 1000
+    }
+
+    jsPsych.init({
+        default_iti: 700,
+        timeline: [getID, getName, getClass, preInst, preTrl, theInst, theML, theWrap],//],
+        on_finish: function () { 
+            //fn='ML_'+par_info.theClass+'_'+par_info.theID+'.csv';
+            url = "https://script.google.com/macros/s/AKfycbwyIIUPil3G1-UKX_0pLnZR7yU6KQg4fuarbKkKqCOS8lYZTL2GCwhdrttXH1QkrMKbbQ/exec";
+                     
+            jsPsych.data.addProperties(par_info);
+ //           jsPsych.data.get().ignore(['response', 'internal_node_id','question_order', 'stimulus', 'response_type', 'key_press', 'center_x', 'center_y']).localSave('csv', fn);
+            jsPsychSheet.uploadData(url, jsPsych.data.get().ignore(['response', 'internal_node_id','question_order', 'stimulus', 'response_type', 'key_press', 'center_x', 'center_y']).csv());
+//            jsPsych.data.displayData('csv'); 
+        }
+    });
+</script>
+
+</html>
