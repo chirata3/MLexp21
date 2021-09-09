@@ -41,7 +41,7 @@
         {prompt: '<br><br>心理学実験：長さの錯視2021<br>学籍番号を入力してください（例：21EC000）<br><br>', 
             columns: 10, required: true, name: 'theID'},
         ],
-        button_label: '名前の入力へ',
+        button_label: '実習班の入力へ',
         on_finish: function(data) {
             var parser = new UAParser();
             var result = parser.getResult();
@@ -53,17 +53,17 @@
         }
     };
 
-    var getName = {
-        type: 'survey-text',
-        questions: [
-            {prompt: '名前を入力して下さい（例：十文字こと）', 
-            columns: 20, required: true,name: 'theName'},
-        ],
-        button_label: '実習班の選択へ',
-        on_finish: function(data) {
-            par_info.theName = data.response.theName
-        }
-    };
+    // var getName = {
+    //     type: 'survey-text',
+    //     questions: [
+    //         {prompt: '名前を入力して下さい（例：十文字こと）', 
+    //         columns: 20, required: true,name: 'theName'},
+    //     ],
+    //     button_label: '実習班の選択へ',
+    //     on_finish: function(data) {
+    //         par_info.theName = data.response.theName
+    //     }
+    // };
 
     var getClass = {
         type: 'survey-multi-choice',
@@ -182,8 +182,8 @@
     }
 
     var practice_types =[
-        {aD: 90, decF:  1*moVel, condN: '90練習下降'},
-        {aD: 90, decF: -1*moVel, condN: '90練習上昇'},
+        {aD: 90, decF:  1*moVel, condN: '90dec_p'},
+        {aD: 90, decF: -1*moVel, condN: '90inc_p'},
      ]
     var practice_trials = jsPsych.randomization.repeat(practice_types, 2);
 
@@ -197,12 +197,12 @@
     }
 
     var trial_types =[
-        {aD: 15, decF:  1*moVel, condN: '15下降'},
-        {aD: 45, decF:  1*moVel, condN: '45下降'},
-        {aD: 90, decF:  1*moVel, condN: '90下降'},
-        {aD: 15, decF: -1*moVel, condN: '15上昇'},
-        {aD: 45, decF: -1*moVel, condN: '45上昇'},
-        {aD: 90, decF: -1*moVel, condN: '90上昇'},
+        {aD: 15, decF:  1*moVel, condN: '15dec'},
+        {aD: 45, decF:  1*moVel, condN: '45dec'},
+        {aD: 90, decF:  1*moVel, condN: '90dec'},
+        {aD: 15, decF: -1*moVel, condN: '15inc'},
+        {aD: 45, decF: -1*moVel, condN: '45inc'},
+        {aD: 90, decF: -1*moVel, condN: '90inc'},
      ]
     var shuffled_trials = jsPsych.randomization.repeat(trial_types, 1);
 
@@ -271,12 +271,12 @@
               'データのダウンロードが始まります。<br><br>' +
               'できたファイルを提出して下さい。もう一息です。</center>',
 //              'できたファイルを<a href="https://forms.office.com/r/hkW4b31LNU"> ここから提出</a>して下さい。</center>',
-        post_trial_gap: 1000
+//        post_trial_gap: 1000
     }
 
     jsPsych.init({
         default_iti: 700,
-        timeline: [getID, getName, getClass, preInst, preTrl, theInst, theML, theWrap],//],
+        timeline: [getID, getClass, preInst, preTrl, theInst, theML, theWrap],//],
         on_finish: function () { 
             //fn='ML_'+par_info.theClass+'_'+par_info.theID+'.csv';
             url = "https://script.google.com/macros/s/AKfycbxVFaLWOOFxmx0WSMJENdI9HqQXBrJb5a9swEhjgBLDHisZQVGC7Ap2APAImHCH23SUKA/exec";
