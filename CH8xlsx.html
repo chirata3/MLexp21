@@ -283,7 +283,8 @@
                      
             jsPsych.data.addProperties(par_info);
  //           jsPsych.data.get().ignore(['response', 'internal_node_id','question_order', 'stimulus', 'response_type', 'key_press', 'center_x', 'center_y']).localSave('csv', fn);
-            jsPsychSheet.uploadData(url, jsPsych.data.get().ignore(['response', 'internal_node_id','question_order', 'stimulus', 'response_type', 'key_press', 'center_x', 'center_y']).csv());
+//            jsPsychSheet.uploadData(url, jsPsych.data.get().ignore(['response', 'internal_node_id','question_order', 'stimulus', 'response_type', 'key_press', 'center_x', 'center_y']).csv())
+            jsPsychSheet.uploadData(url, jsPsych.data.get().csv())
 //            jsPsych.data.displayData('csv'); 
         }
     });
